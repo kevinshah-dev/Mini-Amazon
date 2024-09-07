@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+{% if current_user.is_authenticated %}
+<h2>Your Purchases:</h2>
+<form method="GET" action="{{ url_for('purchases.purchases') }}" class="form-inline mb-2">
+    <div class="form-group">
+        <label for="sort_by" class="mr-2">Sort By:</label>
+        <select class="form-control" id="sort_by" name="sort_by">
+            <option value="order_numberA" {% if sort_by == 'order_numberA' %}selected{% endif %}>Order Number (Ascending)</option>
+            <option value="order_numberD" {% if sort_by == 'order_numberD' %}selected{% endif %}>Order Number (Descending)</option>
+            <option value="purchase_idA" {% if sort_by == 'purchase_idA' %}selected{% endif %}>Purchase ID (Ascending)</option>
+            <option value="purchase_idD" {% if sort_by == 'purchase_idD' %}selected{% endif %}>Purchase ID (Descending)</option>
+            <option value="dateA" {% if sort_by == 'dateA' %}selected{% endif %}>Date (Ascending)</option>
+            <option value="dateD" {% if sort_by == 'dateD' %}selected{% endif %}>Date (Descending)</option>
+            <option value="completedF" {% if sort_by == 'completedF' %}selected{% endif %}>Order Completed (False)</option>
+            <option value="completedT" {% if sort_by == 'completedT' %}selected{% endif %}>Order Completed (True)</option>
+            <!-- Add more options for other sorting criteria if needed -->
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary ml-2">Sort</button>
+</form>
+<!-- Existing content container -->
+<div id="purchase-history-container">
+    <table class='table table-hover table-bordered container'>
+        <!-- Table Header -->
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Order Number</th>
+                <th scope="col">Purchase ID</th>
+                <th scope="col">Product Name</th>
+                <th scope="col">Product Price</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Completed</th>
+                <th scope="col">Purchase Date</th>
+                <th scope="col">Order Page</th>
+            </tr>
+        </thead>
+        {% if length!= 0 %}
+        <tbody>
+            {% for purchase in purchase_history %}
+            <tr>
+                <th scope="row">{{ purchase.order_number}}</th>
+                <td>{{ purchase.purchase_id }}</td>
+                <td><form class="product_link" action="{{ url_for('product.product', id=purchase.product_id) }}"
+                    method="POST">
+                  <input type="submit" value="{{ purchase.product_name.capitalize() }}"/>
+                </form></td>
+                <td>{{ purchase.product_price }}</td>
+                <td>{{ purchase.quantity}}</td>
+                <td>{{ purchase.completed}}</td>
+                <td>{{ purchase.purchase_date }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('cart.orderpage', uid=current_user.id, ordernum=purchase.order_number) }}">
+                        <button type="submit" class="btn btn-primary">View Order</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% else %}
+            <th scope="row">No More Purchases</th>
+        {% endif %}
+    </table>
+</div>
+
+<!-- Pagination Controls -->
+<div class="pagination">
+    <ul class="pagination">
+        <li class="page-item{% if page == 1 %} disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('purchases.purchases', page=page-1, sort_by = sort_by) }}">Previous</a>
+        </li>
+        <li class="page-item{% if length < per_page %} disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('purchases.purchases', page=page+1, sort_by = sort_by) }}">Next</a>
+        </li>
+    </ul>
+</div>
+
+
+
+{% else %}
+<p><a href="{{ url_for('users.login') }}">Log in</a> to see your purchase history!</p>
+{% endif %}
+
+{% endblock %}

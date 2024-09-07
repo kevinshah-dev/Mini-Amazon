@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+  <ul class=flashes>
+    {% for message in messages %}
+    <li>{{message}} </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endwith %}
+<br><br>
+
+<h1> Order Summary for Order # {{ordernum}} </h1>
+<h3> Order Total: {{total}} </h3>
+{% if fulfilled %}
+<h3> Order Status: All items have been fulfilled! </h3>
+{% else %}
+<h3> Order Status: Items still awaiting fulfillment.</h3>
+{% endif %}
+<br><br>
+<table class='table table-hover table-bordered container'>
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Product Name</th>
+        <th scope="col">Unit Price</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Price</th>
+        <th scope="col">Seller Name</th>
+        <th scope="col">Fulfillment Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items%}
+        <tr>
+          <th scope="row"><form class="product_link" action="{{ url_for('product.product', id=item.pid) }}"
+            method="POST">
+          <input type="submit" value="{{ item.name.capitalize() }}"/>
+        </form></th>
+          <td>{{item.price}}</td>
+          <td>{{item.quantity}}</td>
+          <td> {{item.price*item.quantity}}</td>
+          <td>{{item.seller_firstname}} {{item.seller_lastname}}</td>
+          {% if item.completed %}
+          <td>Fulfilled!</td>
+          {% else %}
+          <td>Awaiting Fulfillment</td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% endblock %}

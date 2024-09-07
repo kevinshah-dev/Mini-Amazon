@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br>
+<style>
+  .div1{
+    margin-top: 50px;
+  }
+</style>
+<h2>{{product.name.capitalize()}}</h2>
+<p>Category: {{product.category}}</p>
+<p>${{product.price}}</p>
+<img src="{{ image_url }}" alt="{{ product.name }}"
+    alt="{{ product.name }}" height="20%" width="20%">
+<br>
+<p>{{product.description}}</p>
+
+<!-- Sell this product -->
+{% if current_user.is_authenticated %}
+<form action = "{{url_for ('supply.mystorefront')}}" method = "POST">
+  <input type="hidden" name="product_id" value="{{ product.id }}">
+  <button type="submit">Sell this product!</button>
+</form>
+{% else %}
+<p><a href="{{ url_for('users.login') }}">Log in</a> to sell this product!</p>
+{% endif %}
+
+<!-- Sellers -->
+<br>
+<table class = 'table table-hover table-bordered container'>
+  <thead class = "thead-dark">
+  <tr>
+    <th scope="col"></th>
+    <th scope="col">Seller Name</th>
+    <th scope="col">Seller Rating</th>
+    <th scope="col">Product Price</th>
+    <th scope="col">Add to Cart</th>
+  </tr>
+</thead>
+{% if length_s != 0 %}
+<tbody>
+  {% for seller, image, rating in combined_sellers %}
+  <tr>
+    <th scope="row">
+      <img src="{{ url_for('static', filename=image) }}" alt="Profile Picture" width="60" height="60">
+    </th>
+    <td>
+      <a href="{{ url_for('supply.storefront_by_uid', user_id=seller.sid) }}">
+        {{ seller.firstname }} {{ seller.lastname }}
+      </a>
+    </td>
+    <td>
+      <div class="stars-outer">
+      <div class="stars-inner" style="width: {{ rating }}%;"></div>
+      </div>
+    </td>
+    <td>{{seller.price}}</td>
+    <td>
+      {% if current_user.is_authenticated %}
+      <form action = "{{url_for ('cart.add', product_id=product.id, seller_id = seller.sid)}}" method = "POST" id = "formSubmit">
+      <label for="quantity">Quantity:</label><br>
+      <input type="number" name="quantity" required><br>
+      <button type="submit" value="AddtoCart" {% if current_user.id == seller.sid %} disabled{% endif %}>Add to Cart!</button>
+      </form>
+      <a class="btn btn-secondary btn-med float-right {% if current_user.id == seller.sid %} disabled{% endif %}" href ="{{url_for('cart.addtoSavedList', product_id=product.id, seller_id=seller.sid)}}" role = "button">Save for Later!</a>
+      {% else %}
+      <p><a href="{{ url_for('users.login') }}">Log in</a> to add to cart!</p>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+{% else %}
+  <th scope="row">Out of Stock</th>
+{% endif %}
+</table>
+<br><br>
+<br><br>
+
+<!-- Add Reviews -->
+<h2><p>Reviews: {{ total_reviews }} review{{ 's' if total_reviews != 1 else '' }} averaging {{ avgRating }} stars</h2>
+{% if current_user.is_authenticated %}
+<a href="{{ url_for('product.addproductreview', id=product.id) }}" class="btn btn-primary">Add Review</a> <br>
+{% else %}
+<p><a href="{{ url_for('users.login') }}">Log in</a> to add a review!</p>
+{% endif %}
+<br>
+
+<!-- Reviews -->
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">User Name</th>
+      <th scope="col">Product Rating</th>
+      <th scope="col">Product Review</th>
+      <th scope="col">Time of Review</th>
+    </tr>
+  </thead>
+  {% if length_r != 0 %}
+  <tbody>
+    {% for review in reviews %}
+      <tr>
+        <th scope="row">{{review.uname}} {{review.lname}}</th>
+        <td>      
+          <div class="stars-outer">
+            <div class="stars-inner" style="width: {{ review.rating * 20 }}%;"></div>
+          </div>
+        </td>
+        <td>{{review.review}}</td>
+        <td>{{review.review_time}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  {% else %}
+    <th scope="row">No More Product Reviews</th>
+  {% endif %}
+</table>
+
+<!-- Pagination -->
+<div class="pagination">
+  <ul class="pagination">
+      <li class="page-item{% if page == 1 %} disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('product.product', id=product.id, page=page-1) }}">Previous</a>
+      </li>
+      <li class="page-item{% if length_r < per_page %} disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('product.product', id=product.id, page=page+1) }}">Next</a>
+      </li>
+  </ul> 
+</div>
+
+{% endblock %}

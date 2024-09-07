@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if current_user.is_authenticated %}
+
+<br><br>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+  <ul class=flashes>
+    {% for message in messages %}
+    <li>{{message}} </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endwith %}
+
+<h1> Cart Summary </h1>
+<br><br>
+
+<table class='table table-hover table-bordered container'>
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Product Name</th>
+        <th scope="col">Seller Name</th>
+        <th scope="col">Unit Price</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Change</th>
+        <th scope="col">Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items%}
+        <tr>
+          <th scope="row"><form class="product_link" action="{{ url_for('product.product', id=item.pid) }}"
+            method="POST">
+          <input type="submit" value="{{ item.name.capitalize() }}"/>
+        </form>
+        </th>
+          <td>{{item.seller_firstname}} {{item.seller_lastname}}</td>
+          <td>{{item.price}}</td>
+          <td>{{item.quantity}}</td>
+          <td><form action = "{{url_for ('cart.change', product_id=item.pid, seller_id = item.sid)}}" method = "POST" id = "formSubmit">
+            <label for="quantity">Quantity:</label><br>
+            <input type="number" name="quantity" required></label><br>
+            <button type="submit" value="Change">Change quantity!</button>
+          </form>
+          <a class="btn btn-secondary btn-med float-right" href="{{ url_for('cart.delete', product_id=item.pid, seller_id = item.sid) }}" role="button">Delete from Cart</a>
+          <br><br>
+          <a class="btn btn-secondary btn-med float-right" href ="{{url_for('cart.movetoSavedList', product_id=item.pid, seller_id=item.sid, quantity=item.quantity)}}" role = "button">Save for Later!</a>
+          </td>
+          <td> {{item.price*item.quantity}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3> Total Price: {{totalprice}}</h3>
+
+  <a class="btn btn-secondary btn-lg float-left" href="{{ url_for('cart.order') }}" role="button">Purchase All Items In Cart</a>
+  <br><br>
+  <br><br>
+
+  <head>
+  <style>
+     .line {
+            border-bottom: 4px solid black;
+            margin-top: 4px;
+            width: 100%;
+        }
+  </style>
+  </head>
+  <body>
+    <div class = "line"></div>
+  </body>
+
+  <br><br>
+
+  <h1> Saved For Later </h1>
+  <br><br>
+
+  <table class='table table-hover table-bordered container'>
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Product Name</th>
+        <th scope="col">Seller Name</th>
+        <th scope="col">Unit Price</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Change</th>
+        <th scope="col">Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in savedlist%}
+        <tr>
+          <th scope="row"><form class="product_link" action="{{ url_for('product.product', id=item.pid) }}"
+            method="POST">
+          <input type="submit" value="{{ item.name.capitalize() }}"/>
+        </form></th>
+          <td>{{item.seller_firstname}} {{item.seller_lastname}}</td>
+          <td>{{item.price}}</td>
+          <td>{{item.quantity}}</td>
+          <td><form action = "{{url_for ('cart.changeinSavedList', product_id=item.pid, seller_id = item.sid)}}" method = "POST" id = "formSubmit">
+            <label for="quantity">Quantity:</label><br>
+            <input type="number" name="quantity" required></label><br>
+            <button type="submit" value="Change">Change quantity!</button>
+            <a class="btn btn-secondary btn-med float-right" href="{{ url_for('cart.deleteinSavedList', product_id=item.pid, seller_id = item.sid) }}" role="button">Delete</a>
+            <br><br>
+            <a class="btn btn-secondary btn-med float-right" href ="{{url_for('cart.movetoCart', product_id=item.pid, seller_id=item.sid, quantity=item.quantity)}}" role = "button">Move to Cart!</a>
+          </form>
+          </td>
+          <td> {{item.price*item.quantity}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% else %}
+<p><a href="{{ url_for('users.login') }}">Log in</a> to see your cart!</p>
+{% endif %}
+
+{% endblock %}

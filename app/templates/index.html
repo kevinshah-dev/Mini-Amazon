@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+<style>
+  .div1{
+    margin-top: 50px;
+  }
+</style>
+
+<h2>Products for sale:</h2>
+<form action="/search" method="POST">
+  <!-- Search Box (default) -->
+  <label for="search_str">Search Product Name:</label>
+  <input type="text" name="search_str" value="{{ request.form.get('search_str') if request.form.get('search_str') else request.args.get('search_str', '') }}"><br>
+
+  <!-- Expandable -->
+  <details>
+    <summary><u>[Advanced Search Options]</u></summary>
+    <!-- Checkboxes -->
+    <p>Categories to Include (if no selection default is all categories):</p>
+    {% for category in categories %}
+    <input type="checkbox" name="category" value="{{category}}" {% if category in request.args.getlist('category') or category in request.form.getlist('category') or category == clicked_category %}checked{% endif %}>
+    <label for="{{category}}">{{category}}</label>
+    {% endfor %}
+
+    <p>Product Availability Statuses to Include (if no selection will include both by default):</p>
+    <input type="checkbox" id="availability_true" name="availability" value="true" {% if 'true' in request.form.getlist('availability') or request.args.getlist('availability') %}checked{% endif %}>
+    <label for="availability_true">True</label>
+    <input type="checkbox" id="availability_false" name="availability" value="false" {% if 'false' in request.form.getlist('availability') or request.args.getlist('availability') %}checked{% endif %}>
+    <label for="availability_false">False</label>
+    <br>
+
+    <label for="min_rating">Minimum product rating (1-5, if no reviews given a product will not appear):</label><br>
+    <input type="number" name="min_rating" min="0" max="5" value="{{ request.form.get('min_rating') if request.form.get('min_rating') else request.args.get('min_rating','') }}"></label><br>
+
+    <label for="min_reviews">Minimum number of reviews:</label><br>
+    <input type="number" name="min_reviews" min="0" value="{{ request.form.get('min_reviews') if request.form.get('min_reviews') else request.args.get('min_reviews','') }}"></label><br>
+
+    <label for="max_price">Maximum price:</label><br>
+    <input type="number" name="max_price" min="0" step="0.01" value="{{ request.form.get('max_price') if request.form.get('max_price') else request.args.get('max_price','') }}"></label><br>
+    <br>
+
+    <!-- Sort priority dropdowns -->
+    <!-- If sort by ASC and DESC on same attribute it's a you problem...
+      Would end up sorting by the last specified sorting order for the attribute -->
+    <label for="sort1">Choose first priority sort order:</label>
+    <select name="sort1" id="sort1">
+      <option value="">None</option>
+      <option value="price ASC" {% if 'price ASC' == request.form.get('sort1') or 'price ASC' == request.args.get('sort1') %}selected{% endif %}>Ascending Price</option>
+      <option value="rating ASC" {% if 'rating ASC' == request.form.get('sort1') or 'rating ASC' == request.args.get('sort1') %}selected{% endif %}>Ascending Product Rating</option>
+      <option value="reviews ASC" {% if 'reviews ASC' == request.form.get('sort1') or 'reviews ASC' == request.args.get('sort1') %}selected{% endif %}>Ascending Number of Reviews</option>
+      <option value="price DESC" {% if 'price DESC' == request.form.get('sort1') or 'price DESC' == request.args.get('sort1') %}selected{% endif %}>Descending Price</option>
+      <option value="rating DESC" {% if 'rating DESC' == request.form.get('sort1') or 'rating DESC' == request.args.get('sort1') %}selected{% endif %}>Descending Product Rating</option>
+      <option value="reviews DESC" {% if 'reviews DESC' == request.form.get('sort1') or 'reviews DESC' == request.args.get('sort1') %}selected{% endif %}>Descending Number of Reviews</option>
+      <option value="name ASC" {% if 'name ASC' == request.form.get('sort1') %}selected{% endif %}>Alphabetical by Name</option>
+    </select><br>
+
+    <label for="sort2">Choose second priority sort order:</label>
+    <select name="sort2" id="sort2">
+      <option value="">None</option>
+      <option value="price ASC" {% if 'price ASC' == request.form.get('sort2') or 'price ASC' == request.args.get('sort2') %}selected{% endif %}>Ascending Price</option>
+      <option value="rating ASC" {% if 'rating ASC' == request.form.get('sort2') or 'rating ASC' == request.args.get('sort2') %}selected{% endif %}>Ascending Product Rating</option>
+      <option value="reviews ASC" {% if 'reviews ASC' == request.form.get('sort2') or 'reviews ASC' == request.args.get('sort2') %}selected{% endif %}>Ascending Number of Reviews</option>
+      <option value="price DESC" {% if 'price DESC' == request.form.get('sort2') or 'price DESC' == request.args.get('sort2') %}selected{% endif %}>Descending Price</option>
+      <option value="rating DESC" {% if 'rating DESC' == request.form.get('sort2') or 'rating DESC' == request.args.get('sort2') %}selected{% endif %}>Descending Product Rating</option>
+      <option value="reviews DESC" {% if 'reviews DESC' == request.form.get('sort2') or 'reviews DESC' == request.args.get('sort2') %}selected{% endif %}>Descending Number of Reviews</option>
+      <option value="name ASC" {% if 'name ASC' == request.form.get('sort2') %}selected{% endif %}>Alphabetical by Name</option>
+    </select><br>
+
+    <label for="sort3">Choose third priority sort order:</label>
+    <select name="sort3" id="sort3">
+      <option value="">None</option>
+      <option value="price ASC" {% if 'price ASC' == request.form.get('sort3') or 'price ASC' == request.args.get('sort3') %}selected{% endif %}>Ascending Price</option>
+      <option value="rating ASC" {% if 'rating ASC' == request.form.get('sort3') or 'rating ASC' == request.args.get('sort3') %}selected{% endif %}>Ascending Product Rating</option>
+      <option value="reviews ASC" {% if 'reviews ASC' == request.form.get('sort3') or 'reviews ASC' == request.args.get('sort3') %}selected{% endif %}>Ascending Number of Reviews</option>
+      <option value="price DESC" {% if 'price DESC' == request.form.get('sort3') or 'price DESC' == request.args.get('sort3') %}selected{% endif %}>Descending Price</option>
+      <option value="rating DESC" {% if 'rating DESC' == request.form.get('sort3') or 'rating DESC' == request.args.get('sort3') %}selected{% endif %}>Descending Product Rating</option>
+      <option value="reviews DESC" {% if 'reviews DESC' == request.form.get('sort3') or 'reviews DESC' == request.args.get('sort3') %}selected{% endif %}>Descending Number of Reviews</option>
+      <option value="name ASC" {% if 'name ASC' == request.form.get('sort3') %}selected{% endif %}>Alphabetical by Name</option>
+    </select><br>
+
+    <label for="sort4">Choose fourth priority sort order:</label>
+    <select name="sort4" id="sort4">
+      <option value="">None</option>
+      <option value="price ASC" {% if 'price ASC' == request.form.get('sort4') or 'price ASC' == request.args.get('sort4') %}selected{% endif %}>Ascending Price</option>
+      <option value="rating ASC" {% if 'rating ASC' == request.form.get('sort4') or 'rating ASC' == request.args.get('sort4') %}selected{% endif %}>Ascending Product Rating</option>
+      <option value="reviews ASC" {% if 'reviews ASC' == request.form.get('sort4') or 'reviews ASC' == request.args.get('sort4') %}selected{% endif %}>Ascending Number of Reviews</option>
+      <option value="price DESC" {% if 'price DESC' == request.form.get('sort4') or 'price DESC' == request.args.get('sort4') %}selected{% endif %}>Descending Price</option>
+      <option value="rating DESC" {% if 'rating DESC' == request.form.get('sort4') or 'rating DESC' == request.args.get('sort4') %}selected{% endif %}>Descending Product Rating</option>
+      <option value="reviews DESC" {% if 'reviews DESC' == request.form.get('sort4') or 'reviews DESC' == request.args.get('sort4') %}selected{% endif %}>Descending Number of Reviews</option>
+      <option value="name ASC" {% if 'name ASC' == request.form.get('sort4') %}selected{% endif %}>Alphabetical by Name</option>
+    </select>
+  </details>
+
+  <!-- Submit -->
+  <input type="submit" value="Search"/>
+</form>
+
+<br>
+{% if length!= 0 %}
+<div class="product_container">
+  {% for product, rating in avail_products %}
+  <div class="product">
+    <img src="{{ url_for('static', filename='img/products/' ~ get_image(product.id)) }}" 
+    alt="{{ product.name }}">
+    <div class="product_info">
+      <form class="product_link" action="{{ url_for('product.product', id=product.id) }}"
+          method="POST">
+        <input type="submit" value="{{ product.name.capitalize() }}"/></td>
+      </form>
+      <p>${{product.price}}</p>
+      <div class="stars-outer">
+        <div class="stars-inner" style="width: {{ rating }}%;"></div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<h3>No More Products</h3>
+{% endif %}
+<br><br><br><br>
+
+<!-- Pagination Controls -->
+<div class="pagination">
+  <ul class="pagination">
+      <li class="page-item{% if page == 1 %} disabled{% endif %}">
+        <a class="page-link" href="{{ url_for('index.search', page=page-1, search_str=search_str, category_selected=category_selected, availability=availability, min_rating=min_rating, min_reviews=min_reviews, max_price=max_price, sort1=sort1, sort2=sort2, sort3=sort3, sort4=sort4) }}">Previous</a>
+      </li>
+      <li class="page-item {% if length < per_page %} disabled{% endif %}">
+        <a class="page-link" href="{{ url_for('index.search', page=page+1, search_str=search_str, category_selected=category_selected, availability=availability, min_rating=min_rating, min_reviews=min_reviews, max_price=max_price, sort1=sort1, sort2=sort2, sort3=sort3, sort4=sort4) }}">Next</a>
+      </li>
+  </ul>
+</div>
+
+<!-- View Cart -->
+{% if current_user.is_authenticated %}
+<a class="btn btn-secondary btn-lg float-right" href="{{ url_for('cart.cart') }}" role="button">View Cart</a>
+{% else %}
+<p><a href="{{ url_for('users.login') }}">Log in</a> to see your cart!</p>
+{% endif %}
+
+<!-- View Recent Purchases -->
+<br><br>
+{% if current_user.is_authenticated %}
+<h2>Your recent purchases:</h2>
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Purchase ID</th>
+      <th scope="col">Product ID</th>
+      <th scope="col">Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for purchase in purchase_history%}
+      <tr>
+        <th scope="row">{{purchase.id}}</th>
+        <td>{{purchase.pid}}</td>
+        <td>{{purchase.time_purchased}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<a class="btn btn-secondary" href="{{ url_for('purchases.purchases') }}" role="button">View All Purchases</a>
+{% else %}
+<p><a href="{{ url_for('users.login') }}">Log in</a> to see your purchase history!</p>
+{% endif %}
+<br><br>
+
+{% endblock %}

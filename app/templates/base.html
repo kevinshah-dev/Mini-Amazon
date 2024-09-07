@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Mini Amazon</title>
+  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/example.css') }}">
+  <style>
+    body {
+        font-family: "Lato", sans-serif;
+    }
+
+    .main-head {
+        height: 150px;
+        background: #FFF;
+    }
+
+    .sidenav {
+        height: 100%;
+        background-color: #000;
+        overflow-x: hidden;
+        padding-top: 20px;
+    }
+
+    .main {
+        padding: 0px 10px;
+    }
+
+    .login-main-text {
+        margin-top: 20%;
+        padding: 60px;
+        color: #fff;
+    }
+
+    .login-main-text h2 {
+        font-weight: 300;
+    }
+
+    .btn-black {
+        background-color: #000 !important;
+        color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topnav">
+    {% if current_user.is_authenticated %}
+    <br>
+        <h1 style="color:rgb(255, 255, 255)">Welcome to Mini Amazon, {{current_user.firstname}}!</h1>
+        <a href="{{ url_for('index.index') }}" {% if active_tab == 'index' %}class="active"{% endif %}>Home</a>
+        <a href="{{ url_for('category.categories') }}" {% if active_tab == 'categories' %}class="active"{% endif %}>Categories</a>
+        <a href="{{ url_for('users.privateProfile') }}" {% if active_tab == 'profile' %}class="active"{% endif %}>See Profile</a>
+        <a href="{{ url_for('cart.cart') }}" {% if active_tab == 'cart' %}class="active"{% endif %}>View Cart</a>
+        <a href="{{ url_for('purchases.purchases') }}" {% if active_tab == 'purchases' %}class="active"{% endif %}>View Purchases</a>
+        <a href="{{ url_for('supply.mystorefront') }}" {% if active_tab == 'storefront' %}class="active"{% endif %}>Storefront/Orders</a>
+        <a href="{{ url_for('supply.storefront_by_uid', user_id=current_user.id) }}" {% if active_tab == 'public_profile' %}class="active"{% endif %}>View Public Profile</a>
+        <div class="right-align">
+            <a href="{{ url_for('users.logout') }}">Log out</a>
+        </div>
+    {% else %}
+        <h1 style="color:rgb(255, 255, 255)">Welcome to Mini Amazon!</h1>
+        <a href="{{ url_for('index.index') }}" {% if active_tab == 'index' %}class="active"{% endif %}>Home</a>
+        <a href="{{ url_for('category.categories') }}" {% if active_tab == 'categories' %}class="active"{% endif %}>Categories</a>
+        <div class="right-align">
+            <a href="{{ url_for('users.login') }}" {% if active_tab == 'login' %}class="active"{% endif %}>Log in</a>
+        </div>
+    {% endif %}
+  </div>
+  <div class="main">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+
+</html>

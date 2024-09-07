@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+{% if current_user.is_authenticated %}
+<h2>Your Profile:</h2>
+<p>Welcome, {{ current_user.firstname }} {{ current_user.lastname }}!</p>
+
+{% if profile_picture_exists %}
+    <img src="{{ url_for('static', filename='img/profilePics/' + current_user.id|string + '.png') }}" alt="Profile Picture" width="200" height="200">
+{% else %}
+    <img src="{{ url_for('static', filename='img/profilePics/defaultPic.png') }}" alt="Profile Picture" width="200" height="200">
+{% endif %}
+
+<br><br>
+<form action="{{ url_for('users.update_profile_picture') }}" method="post" enctype="multipart/form-data">
+    <label for="profile_picture">Update Profile Picture:</label><br>
+    <input type="file" name="profile_picture" accept="image/*"><br><br>
+    <button type="submit" class="btn btn-secondary btn-lg">Submit</button>
+</form>
+{% with update = get_flashed_messages(category_filter=["updatePic"]) %}
+    {% if update %}
+    <ul class="flashes">
+      {% for message in update %}
+          <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<br><br>
+    <h2>Your Information:</h3>
+    <p><strong>Email:</strong> {{ current_user.email }}</p>
+    <p><strong>Address:</strong> {{ current_user.address }}</p>
+
+    <p><a href="{{ url_for('users.update_profile') }}" type="button" class="btn btn-secondary btn-lg">Update your information</a></p>
+    {% with update = get_flashed_messages(category_filter=["update"]) %}
+    {% if update %}
+    <ul class="flashes">
+      {% for message in update %}
+          <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+    <br><br>
+    <h2><strong>Balance:</strong> ${{current_user.balance}}</h2>
+        <div id="increaseBalanceForm">
+            <form action="/increaseBalance"
+                method="POST" id="demo">
+                <label for="k">Increase Balance by:</label>
+                <input type="text" name="k" required></label>
+                <input type="submit" value="Submit"/>
+            </form>
+          </div>
+        <div id="withdrawBalanceForm">
+        <form action="/withdrawBalance"
+            method="POST" id="demo">
+            <label for="k">How much would you like to withdraw?</label>
+            <input type="text" name="k" required></label>
+            <input type="submit" value="Submit"/>
+        </form>
+        </div>
+        <p>
+    {% with balance = get_flashed_messages(category_filter=["balance"]) %}
+    {% if balance %}
+    <ul class="flashes">
+      {% for message in balance %}
+          <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+        </p>
+      <br><br>
+    <h2>Product Reviews:</h2>
+        <table class='table table-hover table-bordered container'>
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col">Your Review</th>
+              <th scope="col">Your Rating</th>
+              <th scope="col">Time of Review</th>
+              <th scope="col">Update Review</th>
+              <th scope="col">Delete Review</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for review in reviews %}
+              <tr>
+                <td>{{review.pname}}</td>
+                <td>{{review.review}}</td>
+                <td>      
+                  <div class="stars-outer">
+                    <div class="stars-inner" style="width: {{ review.rating * 20 }}%;"></div>
+                  </div>
+                </td>
+                <td>{{review.review_time}}</td>
+                <td>
+                  <a href="/updatereviewpage/{{ review.uid }}/{{ review.pid }}" class="btn btn-primary">Update Review</a>
+                </td>
+                <td>
+                  <a href="/deletereview/{{ review.uid }}/{{ review.pid }}" class="btn btn-primary">Delete Review</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    <div class="pagination">
+            <ul class="pagination">
+                <li class="page-item{% if page == 1 %} disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('users.privateProfile', id=current_user.id, page=page-1) }}">Previous</a>
+                </li>
+                <li class="page-item {% if length < per_page %} disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('users.privateProfile', id=current_user.id, page=page+1) }}">Next</a>
+                </li>
+            </ul>
+        </div> 
+    <h2>Your Seller Reviews</h2>
+    <table class='table table-hover table-bordered container'>
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Seller</th>
+              <th scope="col">Your Review</th>
+              <th scope="col">Your Rating</th>
+              <th scope="col">Time of Review</th>
+              <th scope="col">Update Review</th>
+              <th scope="col">Delete Review</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sreview in sellerreviews %}
+              <tr>
+                <td>{{sreview.sid}}</td>
+                <td>{{sreview.review}}</td>
+                <td>      
+                  <div class="stars-outer">
+                    <div class="stars-inner" style="width: {{ sreview.rating * 20 }}%;"></div>
+                  </div>
+                </td>
+                <td>{{sreview.review_time}}</td>
+                <td>
+                  <a href="/updatesellerreviewpage/{{ sreview.uid }}/{{ sreview.sid }}" class="btn btn-primary">Update Review</a>
+                </td>
+                <td>
+                  <a href="/deletesellerreview/{{ sreview.uid }}/{{ sreview.sid }}" class="btn btn-primary">Delete Review</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    
+{% else %}
+<p><a href="{{ url_for('users.login') }}">Log in</a> to see your purchase history!</p>
+{% endif %}
+
+{% endblock %}

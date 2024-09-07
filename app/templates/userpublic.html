@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+<h1>{{user_page.firstname}} {{ user_page.lastname }}</h1>
+<p><strong>Id: </strong>{{ user_page.id }}</p>
+<img src="{{ url_for('static', filename= profile_picture_path) }}" alt="Profile Picture" width="200" height="200">
+<br><br>
+<h3>How to Contact:</h3>
+ <p><strong>Email:</strong> {{ user_page.email }}</p>
+ <p><strong>Address:</strong> {{ user_page.address }}</p>
+<br><br>
+<h2>Products for sale:</h2>
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col" width="10%">Product ID</th>
+      <th scope="col">Product Name</th>
+      <th scope="col">Price</th>
+      <th scope="col">Inventory</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item, details in items_for_sale%}
+      <tr>
+        <th scope="row">{{item.pid}}</th>
+        <td><form class="product_link" action="{{ url_for('product.product', id=details.id) }}"
+          method="POST">
+        <input type="submit" value="{{ details.name.capitalize() }}"/></td>
+      </form></td>
+        <td>{{details.price}}</td>
+        <td>{{item.seller_inventory}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<!-- Pagination Controls -->
+<div class="pagination">
+  <ul class="pagination">
+      <li class="page-item{% if page == 1 %} disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('supply.storefront_by_uid', user_id=user_page.id, page=page-1) }}">Previous</a>
+      </li>
+      <li class="page-item{% if per_page*page > total_selling %} disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('supply.storefront_by_uid', user_id=user_page.id, page=page+1) }}">Next</a>
+      </li>
+  </ul>
+</div>
+<br><br>
+<h2>Seller Reviews</h2>
+<a href="{{ url_for('users.addSellerReviewPage', uid=current_user.id, sid=user_page.id) }}" class="btn btn-primary">Add Seller Review</a><br><br>
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Reviewer Name</th>
+      <th scope="col">Review</th>
+      <th scope="col">Rating</th>
+      <th scope="col">Time of Review</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sreview in seller_reviews %}
+      <tr>
+        <th scope="row">{{sreview.fname}} {{sreview.lname}}</th>
+        <td>{{sreview.review}}</td>
+        <td>      
+          <div class="stars-outer">
+            <div class="stars-inner" style="width: {{ sreview.rating * 20 }}%;"></div>
+          </div>
+        </td>
+        <td>{{sreview.review_time}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<div class="pagination2">
+  <ul class="pagination2">
+      <li class="page-item{% if sellerpage == 1 %} disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('supply.storefront_by_uid', user_id=user_page.id, page=page, sellerpage=sellerpage-1) }}">Previous</a>
+      </li>
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('supply.storefront_by_uid', user_id=user_page.id, page=page, sellerpage=sellerpage+1) }}">Next</a>
+      </li>
+  </ul>
+</div>
+
+<br><br>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<canvas id="myChart" style="width:100%;max-width:800px;max-height:400px"></canvas>
+<script>
+  const xVal = [];
+  const yVal = [];
+  const barColors = ["red", "green","blue","orange","brown"];
+  {% for Xdata,Ydata in chart_info %}
+    xVal.push("{{ Xdata }}");
+    yVal.push("{{ Ydata }}");
+  {% endfor %}
+  new Chart("myChart", {
+    type: "bar",
+    data: {
+      labels: xVal,
+      datasets: [{
+        backgroundColor: barColors,
+        data: yVal
+      }]
+    },
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: "Most Popular Products Bought From This Seller"
+        },
+        legend: {display: false}
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Number of Times Ordered'
+          },
+          ticks: {
+            stepSize: 1,
+            precision: 0,
+          }
+        }
+      }
+    }
+  });
+</script>
+
+
+{% endblock %}

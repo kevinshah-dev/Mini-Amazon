@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+<style>
+  .div1{
+    margin-top: 50px;
+  }
+</style>
+<h2>Product Categories</h2>
+<p>Products are divided into the following categories. Click a category to learn more!</p>
+
+<div class="category_container">
+    {% for category in categories %}
+      <div class="category_info">
+        <form class="category_link" action="{{ url_for('index.search', category=category.name) }}"
+            method="POST">
+          <input type="submit" value="{{ category.name.capitalize() }}"/></td>
+        </form>
+        <p>{{category.description}}</p>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

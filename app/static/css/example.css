@@ -1,0 +1,149 @@
+section {
+color: #fff;
+text-align: center;
+}
+
+.container {
+display: table;
+width: 100%;
+}
+
+.left-half {
+background-color: #ff9e2c;
+position: absolute;
+left: 0px;
+width: 50%;
+}
+
+.right-half {
+background-color: #b6701e;
+position: absolute;
+right: 0px;
+width: 50%;
+}
+
+/* Navbar styling */
+.topnav {
+    background-color: #333;
+    overflow: hidden;
+}
+.topnav a {
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+.topnav a:hover {
+    background-color: #ddd;
+    color: black;
+}
+.topnav a.active {
+    background-color: #04AA6D;
+    color: white;
+}
+
+/* Index page styling */
+.product{
+    box-shadow: 0px 7px 7px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+}
+
+.product_container{
+    display: grid;
+    grid-template-columns: 18% 18% 18% 18% 18%;
+    gap: 2%;
+}
+
+.product_info{
+    text-align: center;
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+    max-width: 100%;
+    max-height: 20%;
+}
+
+.product img{
+    height: 200px;
+    width: 100%;
+    object-fit: cover;
+    border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
+}
+
+.product_link {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+.product_link input {
+    white-space: normal;
+    border: none;
+    background: none;
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer;
+}
+
+/* Rating Stars */
+.stars-outer {
+    display: inline-block;
+    position: relative;
+    font-family: FontAwesome;
+}
+  
+.stars-outer::before {
+    content: "\2606 \2606 \2606 \2606 \2606";
+}
+  
+.stars-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 0;
+  }
+  
+.stars-inner::before {
+    content: "\2605 \2605 \2605 \2605 \2605";
+    color: #f8ce0b;
+}
+
+/* Categories page styling */
+.category_container{
+    display: grid;
+    grid-template-columns: 31% 31% 31%;
+    gap: 2%;
+}
+
+.category_info{
+    text-align: center;
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+    max-width: 100%;
+    max-height: 20%;
+}
+
+.category_link {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+.category_link input {
+    white-space: normal;
+    border: none;
+    background: none;
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer;
+}

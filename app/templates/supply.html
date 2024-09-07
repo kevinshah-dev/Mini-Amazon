@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Add icon library -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<br>
+{% with add_inv_success = get_flashed_messages(category_filter=["add_inv_success"]) %}
+  {% if add_inv_success %}
+    <ul class="flashes">
+      {% for message in add_inv_success %}
+          <li style="color: blueviolet;">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+{% with delete_success = get_flashed_messages(category_filter=["delete_success"]) %}
+  {% if delete_success %}
+    <ul class="flashes">
+      {% for message in delete_success %}
+          <li style="color: blue;">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<h2>Products for sale:</h2>
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col" width="10%">Product ID</th>
+      <th scope="col">Product Name</th>
+      <th scope="col">Price</th>
+      <th scope="col">Inventory</th>
+      <th scope="col" width="18%">Change Quantity</th>
+      <th scope="col" width="7%"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item, details in items_for_sale%}
+      <tr>
+        <th scope="row">{{item.pid}}</th>
+        <td><form class="product_link" action="{{ url_for('product.product', id=details.id) }}"
+          method="POST">
+        <input type="submit" value="{{ details.name.capitalize() }}"/></td>
+      </form></td>
+        <td>{{details.price}}</td>
+        <td>{{item.seller_inventory}}</td>
+        <td><form action="{{ url_for('supply.updateQ', pid=item.pid) }}" method="POST" id="demo">
+          <input type="number" name="new_q" min="0" style="width: 80px;" value="{{item.seller_inventory}}" required></label>
+          <button type="submit" value="Update">Update!</button>
+        </form></td>
+        <td><form action="{{ url_for('supply.deleteInv', pid=item.pid) }}" method="POST">
+          <button class="btn"><i class="fa fa-trash"></i></button></form></td>
+          <!--<input type="submit" value="Delete Item"/></td>-->
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Selling Pagination Controls -->
+<div class="pagination">
+  <ul class="pagination">
+      <li class="page-item{% if page_selling == 1 %} disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('supply.mystorefront', page_selling=page_selling-1, page_order=page_order) }}">Previous</a>
+      </li>
+      <li class="page-item{% if per_page*page_selling >= total_selling %} disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('supply.mystorefront', page_selling=page_selling+1, page_order=page_order) }}">Next</a>
+      </li>
+  </ul>
+</div>
+
+{% if current_user.is_authenticated %}
+<h5>Add Product to Storefront</h5>
+<div id="addtoinv">
+  <form action="/mystorefront/addinv" method="POST" id="demo">
+      <label for="pid">Product ID</label>
+      <input type="number" name="pid" min="0" style="width: 80px;" value="{{ request.form.get('product_id', '') }}" required></label>
+      <label for="quantity">Quantity</label>
+      <input type="number" name="quantity" min="0" style="width: 80px;" required>
+      <!--
+      <label for="price">Price</label>
+      <input type="int" name="price" required></label><br>
+      -->
+      <button type="submit">Add to Storefront!</button>
+  </form>
+</div>
+{% with add_inv = get_flashed_messages(category_filter=["add_inv"]) %}
+  {% if add_inv %}
+    <ul class="flashes">
+      {% for message in add_inv %}
+          <li style="color: red;">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<br><br>
+
+<!-- Previously added products -->
+<h5>Products You Created: </h5>
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Product ID</th>
+      <th scope="col">Product Name</th>
+      <th scope="col">Price</th>
+      <th scope="col">Category</th>
+      <th scope="col">Description</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for product in added_products %}
+      <tr>
+        <th scope="row">{{product.id}}</th>
+        <td>{{product.name}}</td>
+        <td>{{product.price}}</td>
+        <td>{{product.category}}</td>
+        <td>{{product.description}}</td>
+        <td><form action="{{ url_for('supply.edit_product', pid=product.id) }}" method="POST">
+          <button class="btn"><i class="fa fa-edit"></i></button></form></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<br>
+
+<!-- Adding a product -->
+<h5>Create a New Product</h5>
+<div id="addtoprod">
+    <form action="/addproduct" method="POST" enctype="multipart/form-data" id="demo">
+        <label for="name">Name</label>
+        <input type="text" name="name" required></label><br>
+        <label for="price">Price</label>
+        <input type="int" name="price" required></label><br>
+        <label for="category">Category</label> <!-- would need to be a drop down... -->
+        <!-- <input type="text" name="category" required></label><br> -->
+        <select name="category" required>
+        {% for category in categories %}
+          <option value="{{ category }}">{{ category }}</option>
+        {% endfor %}
+        </select><br>
+        <label for="description">Description</label> <!-- should one user be allowed to determine the description for all sellers? -->
+        <input type="text" name="description" required></label><br>
+        <label for="file">Image (.png)</label>
+        <input type="file" name="file">
+        <button type="submit" value="Add to Products!">Add to Products</button>
+    </form>
+</div>
+
+<br>
+<br>
+<h2>Orders:</h2>
+<form action="{{ url_for('supply.ordersearch')}}" method="POST">
+  <!-- Search Box (default) -->
+  <label for="search_str">Search By Buyer First Name:</label>
+  <input type="search_str" name="search_str" value="{{ request.form.get('search_str', '') or request.args.get('search_str', '')}}"></label><br>
+  <p>Search by Fulfillment Status:</p>
+  <label for="fulfilled">Fulfilled</label>
+  <input type="checkbox" id="fulfilled" name="fulfilled" value="fulfilled" {% if 'fulfilled' in request.form.getlist('fulfilled') or 'fulfilled' in request.args.getlist('fulfilled') %}checked{% endif %}>
+  <label for="unfulfilled">Unfulfilled</label>
+  <input type="checkbox" id="unfulfilled" name="fulfilled" value="unfulfilled" {% if 'unfulfilled' in request.form.getlist('fulfilled') or 'unfulfilled' in request.args.getlist('fulfilled') %}checked{% endif %}>
+  <br>
+  <input type="submit" value="Search"/><br><br>
+</form>
+
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col" width="10%">Order Number</th>
+      <th scope="col">Buyer</th>
+      <th scope="col">Address</th>
+      <th scope="col">Date Placed</th>
+      <th scope="col">Product</th>
+      <th scope="col">Quantity</th>
+      <th scope="col">Fulfilled?</th>
+      <th scope="col">Mark Complete</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order, buyer, item_details in orders%}
+      <tr>
+        <th scope="row">{{order.order_number}}</th>
+        <td>
+          <a href="{{ url_for('supply.storefront_by_uid', user_id=buyer.id) }}">
+          {{ buyer.firstname }} {{ buyer.lastname }}</a>
+        </td>
+        <td>{{buyer.address}}</td>
+        <td>{{order.time_purchased}}</td>
+        <td>
+          <a href="{{ url_for('product.product', id=item_details.id) }}">
+          {{item_details.name.capitalize()}}</a>
+        </td>
+        <td>{{order.quantity}}</td>
+        <td>{{order.completed}}</td>
+        <td><form action="{{ url_for('purchases.mark_complete', id=order.id) }}" method="POST">
+          <button class="btn"><i class="fa fa-check"></i></button></form></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<!-- Orders Pagination Controls -->
+<div class="pagination">
+  <ul class="pagination">
+      <li class="page-item{% if page_order == 1 %} disabled{% endif %}">
+        {% if request.form.get('search_str', '') or request.form.getlist('fulfilled')%} <!-- Click Search First Time -->
+        <a class="page-link" href="{{ url_for('supply.ordersearch', page_selling=page_selling, page_order=page_order-1, search_str=request.form.get('search_str', ''), fulfilled=request.form.getlist('fulfilled')) }}">Previous</a>
+        {% elif request.args.get('search_str', '') or request.args.getlist('fulfilled')%}  <!-- Showing Later Pages of Filtered Search -->
+        <a class="page-link" href="{{ url_for('supply.ordersearch', page_selling=page_selling, page_order=page_order-1, search_str=request.args.get('search_str', ''), fulfilled=request.args.getlist('fulfilled')) }}">Previous</a>
+        {% else %}
+        <a class="page-link" href="{{ url_for('supply.mystorefront', page_selling=page_selling, page_order=page_order-1) }}">Previous</a>
+        {% endif %}
+      <li class="page-item{% if page_order == 1 %} disabled{% endif %}">
+      
+      <li class="page-item{% if per_page*page_order >= total_orders %} disabled{% endif %}">
+        {% if request.form.get('search_str', '') or request.form.getlist('fulfilled')%}
+        <a class="page-link" href="{{ url_for('supply.ordersearch', page_selling=page_selling, page_order=page_order+1, search_str=request.form.get('search_str', ''), fulfilled=request.form.getlist('fulfilled')) }}">Next</a>
+        {% elif request.args.get('search_str', '') or request.args.getlist('fulfilled')%}
+        <a class="page-link" href="{{ url_for('supply.ordersearch', page_selling=page_selling, page_order=page_order+1, search_str=request.args.get('search_str', ''), fulfilled=request.args.getlist('fulfilled')) }}">Next</a>
+        {% else %}
+        <a class="page-link" href="{{ url_for('supply.mystorefront', page_selling=page_selling, page_order=page_order+1) }}">Next</a>
+        {% endif %}
+      </li>
+  </ul>
+</div>
+
+
+{% else %}
+<p><a href="{{ url_for('users.login') }}">Log in</a> to sell something!</p>
+{% endif %}
+
+{% endblock %}
